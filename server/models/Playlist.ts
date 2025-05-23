@@ -7,11 +7,6 @@ const PlaylistSchema = new Schema({
         type : String,
         required:true,
     } , 
-    userId : {
-        type : String,
-        ref: 'user',
-        required : true,
-    },
     mood : {
         type: Array,
     },
@@ -32,3 +27,5 @@ const PlaylistSchema = new Schema({
 } , {timestamps : true}); 
 
 const Playlist = model('Playlist', PlaylistSchema);
+
+export default Playlist;
