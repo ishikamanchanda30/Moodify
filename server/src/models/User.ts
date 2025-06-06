@@ -10,6 +10,4 @@ const UserSchema = new Schema({
         type : Playlist,
     }
 
-
-
 })
