@@ -1,20 +1,41 @@
-import express from 'express';
-import queryString from 'query-string';
-const client_id = '32dc2bead8e24470ace9cfddea02856f';
-const redirect_uri = 'http://127.0.0.1:3000/callback';
+import {spotifyApi} from "../utils/config"
 
+require("dotenv").config();
+const express = require("express");
 const app = express();
+app.get("/login", (req:any, res:any) => {
+  const scopes = spotifyApi.scopes;
+  res.redirect(spotifyApi.createAuthorizeURL(scopes));
+});
 
-app.get('/login', function(req, res) {
-  const state = generateRandomString(16);
-  var scope = 'user-read-private user-read-email';
+app.get("/callback", (req:any, res:any) => {
+  const error = req.query.error;
+  const code = req.query.code;
 
-  res.redirect('https://accounts.spotify.com/authorize?' +
-    queryString.stringify({
-      response_type: 'code',
-      client_id: client_id,
-      scope: scope,
-      redirect_uri: redirect_uri,
-      state: state
-    }));
+  if (error) {
+    console.log("callback error");
+    res.send(`Callback error ${error}`);
+    return;
+  }
+  spotifyApi.authorizationCodeGrant(code).then((data:any) => {
+    const accessToken = data.body["access_token"];
+    const refreshToken = data.body["refresh_token"];
+    const expiresIn = data.body["expires_in"];
+
+    spotifyApi.setAccessToken(accessToken);
+    spotifyApi.setRefreshToken(refreshToken);
+
+    console.log("access token is : " , accessToken);
+    console.log("refresh token is : " , refreshToken);
+    res.send("login successfull. you can now browse the points.");
+
+    setInterval(async()=>{
+      const data = await spotifyApi.refreshAccessToken();
+      const accessTokenRefreshed = data.body['access_token'];
+
+    }, expiresIn / 2*1000);
+  }).catch((error:any) => {
+    console.log("error in accessing token", error);
+    res.send("Error getting tokens")
+  });
 });

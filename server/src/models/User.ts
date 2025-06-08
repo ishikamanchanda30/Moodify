@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const {Schema , model} = mongoose;
 import Playlist from "./Playlist";
-const UserSchema = new Schema({
+const User = new Schema({
     userId: {
         type: String,
         required: true,
@@ -11,3 +11,5 @@ const UserSchema = new Schema({
     }
 
 })
+
+export default User;
